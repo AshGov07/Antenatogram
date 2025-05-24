@@ -40,7 +40,7 @@ Antenatogram is a web application designed for managing antenatal care. It provi
 
 ### Clone the Repository:
 ```bash
-git clone https://github.com/FieringWarrior7/Antenatogram.git
+git clone https://github.com/AshGov07/Antenatogram.git
 cd Antenatogram
 ```
 
