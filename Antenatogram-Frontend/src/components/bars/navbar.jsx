@@ -4,8 +4,6 @@ import useAuth from "../../hooks/useAuth";
 import { Link } from 'react-router-dom';
 import { Avatar, Dropdown } from "flowbite-react";
 import useSignOut from "../../hooks/useSignOut";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars } from "@fortawesome/free-solid-svg-icons";
 
 const Navbar = ({ toggleSidebar }) => {  // Remove async
     const { auth } = useAuth();
@@ -54,7 +52,6 @@ const Navbar = ({ toggleSidebar }) => {  // Remove async
                         Login
                     </Link>
                 )}
-                { authstatus && <FontAwesomeIcon icon={faBars} size="2x" onClick={toggleSidebar} className="block md:hidden"/>}
             
             </div>
         </div>
