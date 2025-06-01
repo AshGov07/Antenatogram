@@ -54,7 +54,6 @@ const Navbar = ({ toggleSidebar }) => {  // Remove async
                         Login
                     </Link>
                 )}
-{/*                  { authstatus && <FontAwesomeIcon icon={faBars} size="2x" onClick={toggleSidebar} className="block md:hidden"/>} */}
             
             </div>
         </div>
