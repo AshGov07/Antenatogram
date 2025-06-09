@@ -3,6 +3,7 @@ import { useState } from "react";
 import useAuth from "../../hooks/useAuth";
 import { Avatar, Button } from "flowbite-react";
 import useSignOut from "../../hooks/useSignOut";
+import axios from "../../api/axios";
 
 const Sidebar = () => {
   const [patientInfo, setPatientInfo] = useState({
@@ -19,6 +20,8 @@ const Sidebar = () => {
 
   const [showPrescription, setShowPrescription] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [shareLink, setShareLink] = useState("");
+  const [copySuccess, setCopySuccess] = useState("");
   const { auth } = useAuth();
   const signOutHandler = useSignOut();
   const navigate = useNavigate();
@@ -31,6 +34,50 @@ const Sidebar = () => {
     setShowModal((prevShow) => !prevShow);
   };
 
+  // Function to generate shareable link
+  const handleShare = async () => {
+    setCopySuccess("");
+    setShareLink(""); // Clear previous link
+    try {
+      const patientId = auth.userid || auth.patient_id;
+      if (!patientId) {
+        setCopySuccess("Patient ID not found. Please login again.");
+        return;
+      }
+      const expiryDate = new Date(
+        Date.now() + 7 * 24 * 60 * 60 * 1000
+      ).toISOString();
+
+      // Use the configured axios instance from api/axios.js
+      const res = await axios.post(
+        `/api/patients/${patientId}/share`,
+        {
+          expiryDate,
+        }
+      );
+
+      if (res.data && res.data.link) {
+        setShareLink(`${window.location.origin}/shared/${res.data.link}`);
+        setCopySuccess(""); // Clear any previous error
+      } else {
+        setCopySuccess("Failed to generate link (no link in response)");
+        setShareLink("");
+      }
+    } catch (err) {
+      console.error("Share link error:", err);
+      setShareLink("");
+      setCopySuccess(`Failed to generate link: ${err.message}`);
+    }
+  };
+
+  // Function to copy link to clipboard
+  const handleCopy = () => {
+    if (shareLink) {
+      navigator.clipboard.writeText(shareLink);
+      setCopySuccess("Copied!");
+    }
+  };
+
   return (
     <div className="h-11/12 z-0 top-1/12 w-full bg-white text-black relative overflow-y-auto">
       <div className="px-4 space-y-6 flex flex-col justify-around h-full">
@@ -39,7 +86,7 @@ const Sidebar = () => {
           {auth.role === "doctor" && (
             <button
               className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 w-full"
-              onClick={() => navigate('/patients')}
+              onClick={() => navigate("/patients")}
             >
               ← Back to All Patients
             </button>
@@ -97,34 +144,45 @@ const Sidebar = () => {
             </div>
           </div>
         )}
+
+        {auth.role === "patient" && (
+          <div className="my-4">
+            <button
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              onClick={handleShare}
+            >
+              Share My Data
+            </button>
+            {shareLink && (
+              <div className="mt-2">
+                <input
+                  type="text"
+                  value={shareLink}
+                  readOnly
+                  className="w-full p-2 border rounded mb-1"
+                  onClick={handleCopy}
+                  style={{ cursor: "pointer" }}
+                />
+                <button
+                  className="text-blue-600 underline text-sm"
+                  onClick={handleCopy}
+                  type="button"
+                >
+                  Copy Link
+                </button>
+                {copySuccess && (
+                  <span className="ml-2 text-green-600">{copySuccess}</span>
+                )}
+              </div>
+            )}
+            {!shareLink && copySuccess && (
+              <div className="mt-2 text-red-600 text-sm">{copySuccess}</div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export default Sidebar;
-
-{
-  /* Modal for Magnified Image 
-        {showModal && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
-            onClick={handleModalToggle}
-          >
-            <div className="relative">
-              <button
-                onClick={handleModalToggle}
-                className="absolute top-2 right-2 bg-white text-black px-3 py-1 rounded-full"
-              >
-                X
-              </button>
-              <img
-                src="src/assets/download.jpg"
-                alt="Magnified Prescription"
-                className="w-[80vw] h-auto max-w-4xl rounded"
-              />
-            </div>
-          </div>
-        )}
-          */
-}

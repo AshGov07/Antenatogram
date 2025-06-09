@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import MyResponsiveLine from "../line_graph.jsx";
 
-const GraphsCard = ({ parameters, handleCardClick, formatDate }) => {
+const GraphsCard = ({ parameters, handleCardClick, formatDate, readOnly }) => {
   return (
     <div className="overflow-x-auto">
       <div className="flex justify-around space-x-4 w-full">
@@ -17,6 +17,7 @@ const GraphsCard = ({ parameters, handleCardClick, formatDate }) => {
               labels={parameter.data.map((d) => formatDate(d.date))}
               threshold={parameter.threshold}
               view={'dash'}
+              readOnly={readOnly}
             />
           </div>
         ))}

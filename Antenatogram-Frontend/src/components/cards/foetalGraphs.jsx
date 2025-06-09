@@ -3,7 +3,7 @@ import useFormatDate from "../../hooks/useFormatDate.jsx";
 import GraphModal from "../modals/graphModal.jsx";
 import GraphsCard from "./graphsCard.jsx";
 
-const FoetalMeasurementsGraph = () => {
+const FoetalMeasurementsGraph = ({ readOnly }) => {
   const [openModal, setOpenModal] = useState(false);
   const [selectedParameter, setSelectedParameter] = useState(null);
 
@@ -81,7 +81,7 @@ const FoetalMeasurementsGraph = () => {
     <div>
       <div className="bg-white bg-opacity-45 backdrop-blur-lg shadow-lg rounded-lg p-6 border w-full border-gray-200">
         <h2 className="text-lg font-semibold mb-4">Foetal Measurements</h2>
-        <GraphsCard parameters={parameters} handleCardClick={handleCardClick} formatDate={formatDate} />
+        <GraphsCard parameters={parameters} handleCardClick={handleCardClick} formatDate={formatDate} readOnly={readOnly} />
         
         {selectedParameter && (
           <GraphModal
@@ -89,6 +89,8 @@ const FoetalMeasurementsGraph = () => {
             setOpenModal={setOpenModal}
             selectedParameter={selectedParameter}
             onSave={handleSaveChanges}
+            graphName={selectedParameter.id} // Pass the graph name
+            readOnly={readOnly}
           />
         )}
       </div>

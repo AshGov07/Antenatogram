@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
 
 // eslint-disable-next-line react/prop-types
-const MyResponsiveLine = ({ data, labels, threshold, view }) => {
+const MyResponsiveLine = ({ data, labels, threshold, view, readOnly }) => {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
 
@@ -57,17 +57,26 @@ const MyResponsiveLine = ({ data, labels, threshold, view }) => {
           },
         },
         plugins: {
+          tooltip: {
+            enabled: !readOnly, // Disable tooltips in readOnly mode
+          },
           legend: {
             display: false,
           },
-          tooltip: {
-            callbacks: {
-              label: (context) => {
-                const value = context.parsed.y;
-                const color = value >= threshold ? 'red' : 'green';
-                return `Value: ${value} (${color})`;
-              }
-            }
+        },
+        // Disable interactions in readOnly mode
+        events: readOnly ? [] : ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
+        hover: {
+          mode: null,
+          intersect: false
+        },
+        elements: {
+          line: {
+            tension: 0.4
+          },
+          point: {
+            radius: view === 'dash' ? 0 : 2,
+            pointRadius: readOnly ? 0 : 2, // Hide points in readOnly mode
           }
         },
         maintainAspectRatio: view === 'dash' ? false : true, // Adjust aspect ratio for dash view
@@ -79,7 +88,7 @@ const MyResponsiveLine = ({ data, labels, threshold, view }) => {
         chartInstance.current.destroy();
       }
     };
-  }, [data, labels, threshold, view, maxYValue]);
+  }, [data, labels, threshold, view, readOnly, maxYValue]);
 
   return (
     <div style={{ width: view === 'dash' ? '100%' : '100%', maxWidth: view === 'dash' ? '220px' : '600px' }}>

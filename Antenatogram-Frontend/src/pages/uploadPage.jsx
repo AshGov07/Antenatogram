@@ -4,6 +4,7 @@ const UploadReport = () => {
   const [fileType, setFileType] = useState('');
   const [file, setFile] = useState(null);
   const [parameters, setParameters] = useState({});
+  const [extractedText, setExtractedText] = useState('');
 
   const handleFileTypeChange = (e) => {
     setFileType(e.target.value);
@@ -22,12 +23,47 @@ const UploadReport = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('File Type:', fileType);
     console.log('Uploaded File:', file);
     console.log('Entered Parameters:', parameters);
-    // Process the data here
+
+    // Create FormData object to send file and parameters
+    const formData = new FormData();
+    formData.append('fileType', fileType);
+    formData.append('report', file); // Changed 'file' to 'report' to match backend expectation
+    for (const key in parameters) {
+      formData.append(key, parameters[key]);
+    }
+
+    // Send data to the server (replace with your actual API endpoint)
+    try {
+      const response = await fetch('/report/process', { // Replace '/api/upload' with your backend endpoint
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log('Report processed successfully!', responseData);
+        setExtractedText(responseData.extractedText);
+        alert('Report uploaded successfully!'); // Show success message
+      } else {
+        try {
+          const errorData = await response.json(); // Try to get error details from the server
+          console.error('Failed to upload report:', errorData);
+          alert(`Failed to upload report: ${errorData.message || 'Unknown error'}`); // Show error message
+        } catch (jsonError) {
+          console.error('Failed to parse error JSON:', jsonError);
+          alert('Failed to upload report: ' + response.statusText); // Show status text if JSON parsing fails
+        }
+      }
+    } catch (error) {
+      console.error('Error uploading report:', error);
+      alert('Error uploading report: ' + error.message); // Show network error
+      // Handle network errors or other exceptions
+    }
   };
 
   const renderFormFields = () => {
@@ -115,6 +151,12 @@ const UploadReport = () => {
             Submit
           </button>
         </form>
+        {extractedText && (
+          <div className="mt-4 p-4 border rounded">
+            <h2 className="text-lg font-semibold">Extracted Text:</h2>
+            <p>{extractedText}</p>
+          </div>
+        )}
       </div>
     </div>
   );

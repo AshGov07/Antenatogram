@@ -95,10 +95,13 @@ async function signin(req, res, next) {
           sameSite: "Strict",
           maxAge: 10 * 24 * 60 * 60 * 1000,
         });
-        msg = {...msg,
+        msg = {
+          ...msg,
           message: "succesfully logged in",
           accesstoken,
-          refreshtoken
+          refreshtoken,
+          patient_id: role === "patient" ? userexists[id] : undefined,
+          doctor_id: role === "doctor" ? userexists[id] : undefined
         }
         return res.send(msg);
       }
@@ -171,4 +174,5 @@ async function refresh(req, res, next) {
   }
 }
 
+// Only one export at the end!
 export const AuthServices = { signup, signin, logout, refresh };

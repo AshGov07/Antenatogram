@@ -3,7 +3,7 @@ import GraphModal from "../modals/graphModal.jsx";
 import GraphsCard from "./graphsCard.jsx";
 import { format } from "date-fns";
 
-const SelfMonitoringParametersGraph = () => {
+const SelfMonitoringParametersGraph = ({ readOnly }) => {
   const [openModal, setOpenModal] = useState(false);
   const [selectedParameter, setSelectedParameter] = useState(null);
 
@@ -101,14 +101,15 @@ const SelfMonitoringParametersGraph = () => {
     <div>
       <div className="bg-white bg-opacity-45 backdrop-blur-lg w-full shadow-lg rounded-lg p-6 border border-gray-200">
         <h2 className="text-lg font-semibold mb-4">Self Monitoring</h2>
-        <GraphsCard parameters={parameters} handleCardClick={handleCardClick} formatDate={formatDate} />
-
+        <GraphsCard parameters={parameters} handleCardClick={handleCardClick} formatDate={formatDate} readOnly={readOnly} />
         {selectedParameter && (
           <GraphModal
             openModal={openModal}
             setOpenModal={setOpenModal}
             selectedParameter={selectedParameter}
             onSave={handleSaveChanges}
+            graphName={selectedParameter.id} // Pass the graph name
+            readOnly={readOnly}
           />
         )}
       </div>

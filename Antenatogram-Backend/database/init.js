@@ -91,6 +91,27 @@ async function initPregnancy() {
     }  
 }
 
+async function initSharedLinks() {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS shared_links (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        patient_id BINARY(16) NOT NULL,
+        link VARCHAR(64) NOT NULL UNIQUE,
+        expiry_date DATETIME NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (patient_id) REFERENCES patient(patient_id)
+      );
+    `);
+  } catch (error) {
+    console.error("shared_links initialisation error: ", error);
+  } finally {
+    if (connection) connection.release();
+  }
+}
+
 export async function initRelations() {
   await initDB();
   await initPatient();
@@ -98,4 +119,5 @@ export async function initRelations() {
   await initDoctor();
   await initRefreshToken();
   await initPregnancy();
+  await initSharedLinks();
 }

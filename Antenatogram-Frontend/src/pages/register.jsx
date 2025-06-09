@@ -89,6 +89,8 @@ const Register = () => {
         e.preventDefault();
         try {
             const response = await axios.post(REGISTER_URL, { "auth": { "role": auth.role }, email, password: pwd }, { withCredentials: true });
+            // If backend returns user id, store it in auth context (optional, only if you auto-login after registration)
+            // if (response.data && response.data.patient_id) setAuth({ ...auth, userid: response.data.patient_id });
             if (response.status == 200) navigate('/login');
         } catch (error) {
             setErrMsg(error.response.data.error);

@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import GraphModal from "../modals/graphModal.jsx";
 import GraphsCard from "./graphsCard.jsx";
 
-const MarkedParameters = () => {
+const MarkedParameters = ({ readOnly }) => {
   const [openModal, setOpenModal] = useState(false);
   const [selectedParameter, setSelectedParameter] = useState(null);
 
@@ -65,7 +65,7 @@ const MarkedParameters = () => {
         <div className="w-full">
           <h2 className="text-lg font-semibold mb-4">Marked</h2>
           <div className="flex flex-wrap gap-4">
-            <GraphsCard parameters={parameters} handleCardClick={handleCardClick} formatDate={formatDate} />
+            <GraphsCard parameters={parameters} handleCardClick={handleCardClick} formatDate={formatDate} readOnly={readOnly} />
           </div>
           {selectedParameter && (
             <GraphModal
@@ -73,6 +73,8 @@ const MarkedParameters = () => {
               setOpenModal={setOpenModal}
               selectedParameter={selectedParameter}
               onSave={handleSaveChanges}
+              graphName={selectedParameter.id} // Pass the graph name
+              readOnly={readOnly}
             />
           )}
         </div>

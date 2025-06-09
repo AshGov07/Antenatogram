@@ -11,6 +11,7 @@ import AllScansAndReports from './pages/allFiles';
 import AllPatients from './pages/allPatients';
 import UploadReport from './pages/uploadPage';
 import AllAppointments from './pages/allAppointments';
+import SharedPatientData from './pages/SharedPatientData';
 
 function App() {
   // Debug: show current route
@@ -24,6 +25,7 @@ function App() {
         <Route path='login' element={<Login />} />
         <Route path='register' element={<Register />} />
         <Route path='forgot-password' element={<ForgotPassword />} />
+        <Route path='shared/:linkId' element={<SharedPatientData />} />
 
         {/* Protected Routes */}
         <Route element={<RequireAuth allowedRoles={["patient", "doctor"]} />}>
