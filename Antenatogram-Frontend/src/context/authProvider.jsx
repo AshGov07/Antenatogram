@@ -15,10 +15,10 @@ export const AuthProvider = ({ children }) => {
                 withCredentials: true,
                 headers: { 'Content-Type': 'application/json' },
             });
-            setAuth({ ...auth, "accesstoken": response.data.accesstoken, loggedIn: true });
-            if(response.data.pregnancyid) setAuth({...auth, "pregnancyid": response.data.pregnancyid});
+            console.log("Refresh response data:", response.data); // Add logging
+            setAuth({ ...auth, "accesstoken": response.data.accesstoken, loggedIn: true, pregnancyID: response.data.pregnancyID || null });
             console.log("Token refreshed:", response.data.accesstoken);
-            console.log("Pregnancy_id:", response.data.pregnancyid);
+            console.log("Pregnancy_id:", response.data.pregnancyID);
         } catch (error) {
             console.log("Refresh failed", error);
             setAuth({ loggedIn: false, role: "patient", accesstoken: null });

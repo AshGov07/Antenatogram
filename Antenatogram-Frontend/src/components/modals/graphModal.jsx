@@ -3,8 +3,11 @@ import { useState, useCallback, useEffect } from 'react';
 import { Modal, Button, Table, TextInput } from "flowbite-react";
 import useFormatDate from "../../hooks/useFormatDate";
 import MyResponsiveLine from "../line_graph";
+import axios from '../../api/axios';
+import useAuth from '../../hooks/useAuth'; // Ensure auth context is imported
 
 const GraphModal = ({ openModal, setOpenModal, selectedParameter, onSave }) => {
+  const { auth } = useAuth(); // Access auth context
   const [editableData, setEditableData] = useState([]);
   const formatDate = useFormatDate;
   const today = new Date().toISOString().slice(0, 10);
@@ -27,13 +30,44 @@ const GraphModal = ({ openModal, setOpenModal, selectedParameter, onSave }) => {
     setEditableData(prevData => [...prevData, { date: today, value: "0" }]);
   }, [today]);
 
-  const saveChanges = useCallback(() => {
+  const saveChanges = useCallback(async () => {
     if (editableData.some((entry) => !entry.date || entry.value === "")) {
       alert("Please ensure all fields are filled correctly.");
       return;
     }
-    onSave(editableData);
-  }, [editableData, onSave]);
+
+    try {
+      const response = await axios.post('/api/measurements/update', {
+        type: selectedParameter.id,
+        data: editableData,
+        pregnancyID: auth?.pregnancyID
+      }, {
+        withCredentials: true,
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth?.accesstoken}`
+        }
+      });
+
+      if (response.status === 200) {
+        onSave(editableData);
+        setOpenModal(false);
+      }
+    } catch (error) {
+      console.error("Error updating graph data:", error);
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        alert(error.response?.data?.message || "Failed to update measurements");
+      } else if (error.request) {
+        // The request was made but no response was received
+        alert("No response received from the server. Please check your network connection.");
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        alert("An unexpected error occurred: " + error.message);
+      }
+    }
+  }, [editableData, selectedParameter, onSave, setOpenModal, auth?.pregnancyID, auth?.accesstoken]);
 
   const handleDeleteEntry = useCallback((index) => {
     setEditableData(prevData => prevData.filter((entry, i) => i !== index));

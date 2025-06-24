@@ -35,8 +35,8 @@ const SharedPatientData = () => {
 
     const selectedData = {
       patientInfo: {
-        name: patientData?.name || 'Unknown Patient', // Use optional chaining and default value
-        email: patientData?.email || 'No Email' // Use optional chaining and default value
+        name: patientData?.patientInfo?.name || 'Unknown Patient', // Use optional chaining and default value
+        email: patientData?.patientInfo?.email || 'No Email' // Use optional chaining and default value
       },
       measurements: selectedGraphs.reduce((acc, graph) => {
         if (patientData?.measurements && patientData.measurements[graph.value]) {
@@ -52,7 +52,7 @@ const SharedPatientData = () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${patientData?.name || 'shared'}_health_data.json`; // Use optional chaining and default value
+    a.download = `${patientData?.patientInfo?.name || 'shared'}_health_data.json`; // Use optional chaining and default value
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
@@ -70,7 +70,7 @@ const SharedPatientData = () => {
     <div className="min-h-screen p-8 bg-gradient-to-b from-gradstart to-gradend">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="bg-white rounded-lg shadow p-6">
-          <h1 className="text-2xl font-bold mb-6">{patientData?.name ? `${patientData.name}'s Health Data` : 'Shared Health Data'}</h1>
+          <h1 className="text-2xl font-bold mb-6">{patientData?.patientInfo?.name ? `${patientData.patientInfo.name}'s Health Data` : 'Shared Health Data'}</h1>
           
           <div className="mb-6">
             <label className="block text-sm font-medium mb-2">Select Graphs to View:</label>

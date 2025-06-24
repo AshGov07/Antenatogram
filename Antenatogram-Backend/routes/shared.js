@@ -52,25 +52,25 @@ router.get('/:linkId', async (req, res) => {
     // Format the response data
     const responseData = {
       patientInfo: {
-        name: patient.name,  // Ensure name is correctly pulled
-        email: patient.email
+        name: patient?.name || 'Unknown Patient',  // Ensure name is correctly pulled
+        email: patient?.email || 'No Email'
       },
       measurements: {
         selfMonitoring: {
-          weight: measurements.filter(m => m.type === 'weight').map(m => ({ date: m.date, value: m.value })),
-          bloodPressure: measurements.filter(m => m.type === 'bloodpressure').map(m => ({ date: m.date, value: m.value })),
-          bloodSugar: measurements.filter(m => m.type === 'bloodsugar').map(m => ({ date: m.date, value: m.value })),
-          temperature: measurements.filter(m => m.type === 'temperature').map(m => ({ date: m.date, value: m.value }))
+          weight: measurements.filter(m => m.type === 'weight').map(m => ({ date: m.date, value: Number(m.value) })),
+          bloodPressure: measurements.filter(m => m.type === 'bloodpressure').map(m => ({ date: m.date, value: Number(m.value), value2: Number(m.value2) })),
+          bloodSugar: measurements.filter(m => m.type === 'bloodsugar').map(m => ({ date: m.date, value: Number(m.value) })),
+          temperature: measurements.filter(m => m.type === 'temperature').map(m => ({ date: m.date, value: Number(m.value) }))
         },
         foetalMeasurements: {
-          headCircumference: measurements.filter(m => m.type === 'hc').map(m => ({ date: m.date, value: m.value })),
-          abdominalCircumference: measurements.filter(m => m.type === 'ac').map(m => ({ date: m.date, value: m.value })),
-          femurLength: measurements.filter(m => m.type === 'fl').map(m => ({ date: m.date, value: m.value })),
-          biparietalDiameter: measurements.filter(m => m.type === 'bpd').map(m => ({ date: m.date, value: m.value }))
+          headCircumference: measurements.filter(m => m.type === 'hc').map(m => ({ date: m.date, value: Number(m.value) })),
+          abdominalCircumference: measurements.filter(m => m.type === 'ac').map(m => ({ date: m.date, value: Number(m.value) })),
+          femurLength: measurements.filter(m => m.type === 'fl').map(m => ({ date: m.date, value: Number(m.value) })),
+          biparietalDiameter: measurements.filter(m => m.type === 'bpd').map(m => ({ date: m.date, value: Number(m.value) }))
         },
         markedParameters: {
-          hemoglobin: measurements.filter(m => m.type === 'hemoglobin').map(m => ({ date: m.date, value: m.value })),
-          glucoseTolerance: measurements.filter(m => m.type === 'glucosetolerance').map(m => ({ date: m.date, value: m.value }))
+          hemoglobin: measurements.filter(m => m.type === 'hemoglobin').map(m => ({ date: m.date, value: Number(m.value) })),
+          glucoseTolerance: measurements.filter(m => m.type === 'glucosetolerance').map(m => ({ date: m.date, value: Number(m.value) }))
         }
       }
     };

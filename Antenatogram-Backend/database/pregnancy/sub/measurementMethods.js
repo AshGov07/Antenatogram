@@ -95,9 +95,9 @@ export async function updateEntry(updatemeasurementsDTO) {
                 return results;
             }
             else {
-                let query = "UPDATE measurement SET value = (?) WHERE measurement_id = UUID_TO_BIN(?)";
+                let query = "UPDATE measurement SET value = (?), date = (?) WHERE measurement_id = UUID_TO_BIN(?)";
                 for (let i = 0; i < updatemeasurementsDTO.data.length; i++) {
-                    results = await connection.query(query, [updatemeasurementsDTO.data[i].value, updatemeasurementsDTO.data[i].measurementID]);
+                    results = await connection.query(query, [updatemeasurementsDTO.data[i].value,updatemeasurementsDTO.data[i].date, updatemeasurementsDTO.data[i].measurementID]);
                     if (results[0].affectedRows !== 1) return new DBError("update failure, rolling back transaction");
                 }
                 await connection.commit();

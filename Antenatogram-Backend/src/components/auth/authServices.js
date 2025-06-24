@@ -85,13 +85,17 @@ async function signin(req, res, next) {
         role,
         userexists[id]
       );
-      const pregnancy_id = await getCurrentPregnancy(userexists.patient_id);
-      if(pregnancy_id) msg = {...msg, pregnancy_id};
+      let pregnancyID;
+      if (role === "patient") {
+        pregnancyID = await getCurrentPregnancy(userexists.patient_id);
+      } else if (role === "doctor") {
+        pregnancyID = null;
+      }
+      msg = {...msg, pregnancyID};
       if (addingtoken instanceof Error) return next(addingtoken);
       if (addingtoken == true) {
         res.cookie("refreshtoken", refreshtoken, {
           httpOnly: true,
-          // secure: true,
           sameSite: "Strict",
           maxAge: 10 * 24 * 60 * 60 * 1000,
         });
@@ -101,7 +105,8 @@ async function signin(req, res, next) {
           accesstoken,
           refreshtoken,
           patient_id: role === "patient" ? userexists[id] : undefined,
-          doctor_id: role === "doctor" ? userexists[id] : undefined
+          doctor_id: role === "doctor" ? userexists[id] : undefined,
+          pregnancyID: pregnancyID || null // Include pregnancyID in the response
         }
         return res.send(msg);
       }
@@ -116,8 +121,9 @@ async function signin(req, res, next) {
 async function logout(req, res, next) {
   try {
     const refreshtoken = req.cookies.refreshtoken;
-    if (!refreshtoken)
-      return next(new AuthenticationError("No refreshtoken found"));
+    if (!refreshtoken) {
+      return res.status(400).send({ message: "No refreshtoken found" });
+    }
     const verify = await verifyToken(refreshtoken);
     if (verify instanceof Error) return next(verify);
     const role = verify.role;
@@ -125,7 +131,7 @@ async function logout(req, res, next) {
     const deleting = await findAndDelete(role, refreshtoken, id, 1);
     if (deleting instanceof Error) return next(deleting);
     if (deleting) {
-      res.clearCookie("refreshtoken", refreshtoken, {
+      res.clearCookie("refreshtoken", {
         httpOnly: true,
         // secure: true,
         sameSite: "Strict",
@@ -154,19 +160,24 @@ async function refresh(req, res, next) {
     if (find instanceof Error) return next(find);
     if (find == "expired") {
       const newToken = await getNewRefreshToken(role, refreshtoken, id);
-      // msg = {...msg, "refreshtoken": newToken};
-      const pregnancy_id = await getCurrentPregnancy(id) || "jello";
-      if(pregnancy_id) msg = {...msg, "pregnancyid": pregnancy_id};
+      let pregnancyID = null;
+      try {
+        console.log("Attempting to fetch pregnancy ID for user ID:", id); // Add logging
+        pregnancyID = await getCurrentPregnancy(id);
+        console.log("Pregnancy ID fetched during refresh:", pregnancyID); // Add logging
+      } catch (error) {
+        console.error("Error fetching pregnancy ID during refresh:", error); // Add error logging
+      }
+      msg = {...msg, pregnancyID};
       res.cookie("refreshtoken", newToken, {
         httpOnly: true,
-        // secure: true,
         sameSite: "Strict",
         maxAge: 10 * 24 * 60 * 60 * 1000,
       });
     }
     const accesstoken = await generateAccessToken(role, id);
     if (accesstoken instanceof Error) return next(accesstoken);
-    msg = {...msg, accesstoken, "message":"success"};
+    msg = {...msg, accesstoken, "message":"success", pregnancyID: msg.pregnancyID || null}; // Include pregnancyID in the response, even if null
     return res.send(msg);
   } catch (error) {
     console.error("Error in refresh:", error);

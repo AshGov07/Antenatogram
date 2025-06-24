@@ -35,8 +35,8 @@ const Login = () => {
       let userId = null;
       if (role === "patient" && result.data.patient_id) userId = result.data.patient_id;
       if (role === "doctor" && result.data.doctor_id) userId = result.data.doctor_id;
-      setAuth({ ...auth, loggedIn: true, "accesstoken": result.data.accesstoken, userid: userId });
-      if(result.data.pregnancyid) setAuth({...auth, "pregnancyid":result.data.pregnancyid});
+      setAuth({ ...auth, loggedIn: true, "accesstoken": result.data.accesstoken, userid: userId, pregnancyID: result.data.pregnancyID || null });
+      if(result.data.pregnancyID) setAuth({...auth, "pregnancyID":result.data.pregnancyID});
       console.log(result.data);
       if (role == "patient") navigate('/user');
       else navigate("/patients");

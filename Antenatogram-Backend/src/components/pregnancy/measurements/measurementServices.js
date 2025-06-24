@@ -5,7 +5,8 @@ import {
     updateEntry,
     fetchEntries
 } from "../../../../database/pregnancy/sub/measurementMethods.js";
-import {DBError, LogicError} from "../../../utils/Errors.js";
+import { DBError, LogicError } from "../../../utils/Errors.js";
+import { pool } from "../../../../database/db.js";
 
 async function add(req, res, next){
     const data = req.body.data;
@@ -15,33 +16,51 @@ async function add(req, res, next){
     if(adding instanceof Error) return next(adding);
     return res.send({ message: "measurements added" });
 }
-async function update(req, res, next){
-    let data,type,length;
-    try{
-        data = req.body.data;
-        type = req.body.type;
-        length = data.length; // this is only to check if there is some data, otherwise, raise error
-    }
-    catch (e){
-        return next(new LogicError("no data received"));
-    }
-    /* here we expect data to be an array like
-    [
-        {measurementID: "adsa", value: 3} //add value 2 also for bloodpressure
-    ]
-    we will first check each entry to be present then we will update them, raising errors on the way as necessary
-    */
-    try{
-        const finding = await findEntry(data.map(entry => entry.measurementID));
-        if(finding instanceof Error) return next(finding);
-        const updating = await updateEntry({type,data});
-        if(updating instanceof Error) return next(updating);
-        return res.json({"message": "users updated successfully"});
-    }catch (e) {
-        console.log(e);
-        return next(new DBError("could not update values"))
+async function update(req, res, next) {
+    const { type, data, pregnancyID } = req.body; // Ensure pregnancyID is passed in the request body
+    let connection;
+
+    if (!pregnancyID) {
+        return next(new DBError("Pregnancy ID is undefined"));
     }
 
+    try {
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        try {
+            for (const item of data) {
+                const query = `
+                    UPDATE measurement 
+                    SET type = ?, date = ?, value = ?, value2 = ? 
+                    WHERE pregnancy_id = UUID_TO_BIN(?) AND measurement_id = UUID_TO_BIN(?)
+                `;
+
+                const [result] = await connection.query(query, [
+                    type.toLowerCase(),
+                    item.date,
+                    item.value,
+                    item.value2 || null,
+                    pregnancyID,
+                    item.measurementID
+                ]);
+
+                if (result.affectedRows !== 1) {
+                    throw new Error('Failed to update measurement');
+                }
+            }
+
+            await connection.commit();
+            res.json({ message: "Measurements updated successfully" });
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        }
+    } catch (error) {
+        next(new DBError("Failed to update measurements", error));
+    } finally {
+        if (connection) connection.release();
+    }
 }
 async function remove(req, res, next){
     let data,length;

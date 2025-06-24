@@ -7,9 +7,12 @@ export async function getCurrentPregnancy(patientID) {
     connection = await pool.getConnection();
     try {
       let query;
+      console.log("getCurrentPregnancy called with patientID:", patientID); // Add logging
       query =
         "SELECT *, BIN_TO_UUID(pregnancy_id) AS pregnancyID  FROM pregnancy WHERE patient_id = UUID_TO_BIN(?) AND deliverydate IS NULL ORDER BY lmp DESC LIMIT 1;";
+      console.log("Executing query:", query); // Add logging
       const [results] = await connection.query(query, [patientID]);
+      console.log("Query results:", results); // Add logging
       if (results.length > 0) return results[0];
       return false;
     } catch (error) {
@@ -19,7 +22,7 @@ export async function getCurrentPregnancy(patientID) {
   } catch (error) {
     return new DBError("Could not connect to DB", error);
   } finally {
-    connection.release();
+    if (connection) connection.release();
   }
 }
 
